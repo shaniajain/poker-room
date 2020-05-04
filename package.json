@@ -7,7 +7,8 @@
     "start": "node server/app.js",
     "start:dev": "webpack -w & nodemon server/app.js --ignore public",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "sh ./scripts/deploy.sh"
+    "deploy": "sh ./scripts/deploy.sh",
+    "build": "webpack -p --progress"
   },
   "author": "",
   "license": "ISC",
@@ -36,7 +37,9 @@
     "redux-thunk": "^2.2.0",
     "reselect": "^3.0.1",
     "sequelize": "^4.37.5",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.1.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -44,11 +47,9 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
-    "css-loader": "^0.28.10",
+    "css-loader": "^3.5.3",
     "nodemon": "^1.17.2",
     "style-loader": "^0.20.2",
-    "webpack": "^4.0.1",
-    "webpack-cli": "^2.0.9",
     "webpack-dev-server": "^3.1.0"
   }
 }
