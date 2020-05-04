@@ -4,7 +4,8 @@ module.exports = {
   entry: './client/index.js',
   mode: 'development',
   output: {
-    path: path.join(__dirname, 'public'),
+    path: path.resolve(__dirname, 'public'),
+    publicPath: '/public/',
     filename: 'bundle.js'
   },
   devtool: 'source-maps',
