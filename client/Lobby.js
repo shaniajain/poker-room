@@ -37,7 +37,7 @@ class Lobby extends Component {
 				<Paper className="lobby" elevation={8}>
 					<div style={{ width: '50%', marginLeft: 'auto', marginRight: 'auto', paddingTop: '50px' }}>
 						<Typography align="center" variant="headline" gutterBottom>
-							Welcome to Jason's Poker Room
+							Cuber's Poker
 						</Typography>
 						<Divider />
 					</div>
