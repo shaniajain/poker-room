@@ -26,6 +26,8 @@ class Chatbox extends Component {
 
 	render() {
   const messages = this.props.messages;
+	console.log("Chat box messages: " + messages);
+
 		return (
 			<div className='chatbox-container' >
 			<Paper style={{ align: 'center',  width: '50%',  margin: 'auto' }} elevation={8}>
@@ -38,7 +40,7 @@ class Chatbox extends Component {
 							{message.author}: {message.text}{' '}
 						</p>
 					))}
-				</div> 
+				</div>
 				<input type="text" value={this.state.value} onKeyDown={this.handleSubmit} onChange={this.handleChange} style={{ align: 'center',  width: '100%', height: '100%' }} />
 		 </Paper>
 			</div>

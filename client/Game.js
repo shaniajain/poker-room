@@ -11,8 +11,10 @@ import Chip from './Chips';
 import Chatbox from './Chatbox';
 import Lobby from './Lobby';
 import Join from './buttons/Join';
+import Start from './buttons/Start';
 import PlayerCards from './playerCards';
 import OpponentCards from './opponentCards';
+import WinnerMessage from './WinnerMessage';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -31,6 +33,8 @@ class Test extends Component {
 		this.state = {
 			id: '',
 			name: '',
+			view: false,
+			dealer: '',
 			gameState: {
 				spectators: [],
 				players: [],
@@ -39,6 +43,8 @@ class Test extends Component {
 				activeBet: 0,
 				pot: 0,
 				messages: [],
+				winnerMessage: [],
+				started: false,
 				showdown: false
 			},
 			sound: 'none',
@@ -55,6 +61,7 @@ class Test extends Component {
 		this.messageSubmit = this.messageSubmit.bind(this);
 		this.addName = this.addName.bind(this);
 		this.join = this.join.bind(this);
+		this.start = this.start.bind(this);
 		this.changeBet = this.changeBet.bind(this);
 		socket = io.connect();
 		socket.on('clientId', (id) => {
@@ -74,6 +81,7 @@ class Test extends Component {
 				this.setState({ rebuyWindow: true });
 			}
 		});
+		
 	}
 
 	fold() {
@@ -118,7 +126,17 @@ class Test extends Component {
 
 	join() {
 		socket.emit('join');
-		this.setState({ joined: true, spectator: false });
+		if(this.state.gameState.started === true) {
+			this.setState({ joined: true, spectator: false, view: true });
+		}
+		else {
+			this.setState({ joined: true, spectator: false, view: false });
+		}
+	}
+
+	start() {
+		socket.emit('start');
+		this.setState({ started: true});
 	}
 
 	handleRebuy = () => {
@@ -140,6 +158,7 @@ class Test extends Component {
 		} else {
 			return (
 				<div style={{height: '100%'}}>
+						<Start joined={this.state.joined} started={this.state.gameState.started} players={this.state.gameState.players} start={this.start} />
 					<div className="container">
 						<img className="table" src="poker_table.svg" />
 						<SoundEffects sound={this.state.sound} />
@@ -151,11 +170,14 @@ class Test extends Component {
 							showdown={this.state.gameState.showdown}
 							players={this.state.gameState.players}
 							id={this.state.id}
+							messages={this.state.gameState.messages}
+							view={this.state.view}
 						/>
 						<Chip
 							spectator={this.state.spectator}
 							players={this.state.gameState.players}
 							id={this.state.id}
+							view={this.state.view}
 						/>
 					</div>
 					<Actions
@@ -170,8 +192,10 @@ class Test extends Component {
 						clientPlayer={clientPlayer}
 						check={this.check}
 						activeBet={this.state.gameState.activeBet}
+						view={this.state.view}
 					/>
-					<Join joined={this.state.joined} players={this.state.gameState.players} join={this.join} />
+					<Join joined={this.state.joined} spectator={this.state.spectator} started={this.state.gameState.started} players={this.state.gameState.players} join={this.join}/>
+					<WinnerMessage winnerMessage={this.state.gameState.winnerMessage} />
 					<Chatbox messages={this.state.gameState.messages} messageSubmit={this.messageSubmit} />
 					<Dialog open={this.state.rebuyWindow} onClose={this.handleClose}>
 						<DialogTitle>

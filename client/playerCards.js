@@ -10,7 +10,7 @@ const PlayerCards = (props) => {
 				{clientPlayer.map((player) => {
 					if (player.cards.length > 0) {
 						return (
-							<div className="boardInner">
+							<div className="boardInner" style={{top:30, left:0, position: 'absolute'}}>
 								<img className="playerCards" src={`/cardImages/${player.cards[0]}.png`} />
 								<img className="playerCards" src={`/cardImages/${player.cards[1]}.png`} />
 							</div>

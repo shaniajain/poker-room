@@ -13,6 +13,8 @@ const gameState = {
 	smallBlindValue: 5,
 	activeBet: 0,
 	messages: [],
+	winnerMessage: [],
+	started: false,
 	showdown: false,
 	minBet: 20,
 	allIn: false
@@ -22,12 +24,14 @@ const addSpectators = (socketId) => {
 	gameState.spectators.push({
 		id: socketId,
 		name: '',
+		view: false,
 		bankroll: 1000,
 		cards: [],
 		action: false,
 		button: false,
 		smallBlind: false,
 		bigBlind: false,
+		dealer: '',
 		active: false,
 		activeBet: 0,
 		rebuys: 0
@@ -36,6 +40,9 @@ const addSpectators = (socketId) => {
 
 const addPlayer = (socketId) => {
 	const newPlayer = gameState.spectators.filter((player) => player.id === socketId)[0];
+	if(gameState.started === true) {
+		newPlayer.view = true;
+	}
 	gameState.players.push(newPlayer);
 	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
 };
@@ -44,7 +51,10 @@ const dealPlayers = () => {
 	gameState.board = [];
 	gameState.gameDeck.shuffleDeck();
 	for (let i = 0; i < gameState.players.length; i++) {
-		gameState.players[i].cards = gameState.gameDeck.dealCards(2);
+		if(gameState.players[i].view === false) {
+			gameState.players[i].cards = gameState.gameDeck.dealCards(2);
+		}
+		//gameState.players[i].view = false;
 	}
 	gameState.action = 'preflop';
 };
@@ -69,14 +79,64 @@ const blindsToPot = () => {
 };
 
 const setInitialBlinds = () => {
-	gameState.players[0].button = true;
-	gameState.players[0].smallBlind = true;
-	gameState.players[1].bigBlind = true;
+	var d = 0;
+	var num_players = 0;
+	for (let i = 0; i < gameState.players.length; i++) {
+		if(gameState.players[i].dealer === 'D') {
+			d = i;
+		}
+		if(gameState.players[i].view === false) {
+			num_players++;
+		}
+	}
+	gameState.players[d].button = true;
+
+	//set blinds for 2 player game
+	if(num_players === 2) {
+		if(d === 0) {
+			gameState.players[1].smallBlind = true;
+		}
+		else {
+			gameState.players[0].smallBlind = true;
+		}
+		gameState.players[d].bigBlind = true;	//make dealer big blind
+	}
+	//set blinds for more than two player game
+	else {
+		if((d-1) >= 0 && (d-2) >= 0) {
+			gameState.players[d-1].smallBlind = true;
+			gameState.players[d-2].bigBlind = true;
+		}
+		else if((d-1) >= 0 && (d-2) < 0) {
+			gameState.players[d-1].smallBlind = true;
+			gameState.players[gameState.players.length-1].bigBlind = true;
+		}
+		else {
+			gameState.players[gameState.players.length-1].smallBlind = true;
+			gameState.players[gameState.players.length-2].bigBlind = true;
+		}
+	}
 	gameState.players[0].active = true;
 	blindsToPot();
 };
 
 const moveBlinds = () => {
+	//set dealer for next round
+	var d;
+	for(let i = 0; i < gameState.players.length; i++) {
+		if(gameState.players[i].dealer === 'D') {
+			d = i;
+		}
+	}
+	if(d+1 < gameState.players.length) {
+		gameState.players[d].dealer = '';
+		gameState.players[d+1].dealer = 'D';
+	}
+	else {
+		gameState.players[d].dealer = '';
+		gameState.players[0].dealer = 'D';
+	}
+
 	for (let i = 0; i < gameState.players.length; i++) {
 		if (gameState.players[i].button === true) {
 			// reset active player to match blinds
@@ -85,23 +145,33 @@ const moveBlinds = () => {
 			});
 
 			// set current button to false and switch to BB
-			gameState.players[i].button = false;
-			gameState.players[i].smallBlind = false;
-			gameState.players[i].bigBlind = true;
+			if(gameState.players.length === 2) {
+				gameState.players[i].button = false;
+				gameState.players[i].smallBlind = false;
+				gameState.players[i].bigBlind = true;
 
-			// edge case if BB is last in the array
-			if (i + 1 < gameState.players.length) {
-				gameState.players[i + 1].button = true;
-				gameState.players[i + 1].active = true;
-				gameState.players[i + 1].smallBlind = true;
-				gameState.players[i + 1].bigBlind = false;
-			} else {
-				gameState.players[0].button = true;
-				gameState.players[0].active = true;
-				gameState.players[0].smallBlind = true;
-				gameState.players[0].bigBlind = false;
+				// edge case if BB is last in the array
+				if (i + 1 < gameState.players.length) {
+					gameState.players[i + 1].button = true;
+					gameState.players[i + 1].active = true;
+					gameState.players[i + 1].smallBlind = true;
+					gameState.players[i + 1].bigBlind = false;
+				} else {
+					gameState.players[0].button = true;
+					gameState.players[0].active = true;
+					gameState.players[0].smallBlind = true;
+					gameState.players[0].bigBlind = false;
+				}
+				blindsToPot();
 			}
-			blindsToPot();
+			else {
+				for(let x = 0; x < gameState.players.length; x++)
+				{
+					gameState.players[x].smallBlind = false;
+					gameState.players[x].bigBlind = false;
+				}
+				setInitialBlinds();
+			}
 			break;
 		}
 	}
@@ -109,14 +179,36 @@ const moveBlinds = () => {
 
 const check = (socketId) => {
 	for (let i = 0; i < gameState.players.length; i++) {
-		if (gameState.players[i].id === socketId) {
-			gameState.players[i].action = true;
+		if (gameState.players[i].id === socketId && gameState.players[i].view === false) {
+		//	if(gameState.players[i].view === false) {
+				gameState.players[i].action = true;
+		//	}
+		//	else {
+		//		gameState.players[i].action = false;
+		//	}
+
 			if (i + 1 < gameState.players.length) {
-				gameState.players[i + 1].active = true;
-				gameState.players[i].active = false;
+				if(gameState.players[i + 1].view === true) {
+					for (let j = 0; j < gameState.players.length; j++) {
+						gameState.players[j].active = false;
+					}
+					//gameState.players[i + 1].active = false;
+					//gameState.players[i].active = false;
+					gameState.players[0].active = true;
+				}
+				else if(gameState.players[i + 1].view === false){
+					for (let j = 0; j < gameState.players.length; j++) {
+						gameState.players[j].active = false;
+					}
+					gameState.players[i + 1].active = true;
+				//	gameState.players[i].active = false;
+				}
 			} else {
+				for (let j = 0; j < gameState.players.length; j++) {
+					gameState.players[j].active = false;
+				}
 				gameState.players[0].active = true;
-				gameState.players[i].active = false;
+			//	gameState.players[i].active = false;
 			}
 		}
 	}
@@ -124,10 +216,12 @@ const check = (socketId) => {
 
 const playerActionCheck = () => {
 	for (let i = 0; i < gameState.players.length; i++) {
-		if (gameState.players[i].action === false) {
+		if (gameState.players[i].action === false && gameState.players[i].view === false) {
+			console.log("playerActionCheck returning false");
 			return false;
 		}
 	}
+	console.log("playerActionCheck returning true");
 	return true;
 };
 
@@ -146,6 +240,7 @@ const potToPlayer = (player) => {
 	gameState.pot = 0;
 };
 
+
 const potToTie = () => {
 	const halfPot = gameState.pot / 2;
 	gameState.players.forEach((player) => {
@@ -153,6 +248,7 @@ const potToTie = () => {
 	});
 	gameState.pot = 0;
 };
+
 
 const determineWinner = () => {
 	const hands = gameState.players;
@@ -166,13 +262,15 @@ const determineWinner = () => {
 		if (results[0].length > 1) {
 			potToTie();
 			const tieMsg = 'Tie pot, both players have ' + results[0][0].description;
-			gameState.messages.push({ text: tieMsg, author: 'Game' });
+			gameState.winnerMessage.push({ text: tieMsg, author: 'Game' });
+
 		} else {
 			const winnerId = results[0][0].id;
 			const winner = gameState.players.filter((player) => player.id === winnerId)[0];
 			const winnerMsg = winner.name + ' won $' + gameState.pot + ' with ' + results[0][0].description;
-			gameState.messages.push({ text: winnerMsg, author: 'Game' });
-			potToPlayer(winner);
+			gameState.winnerMessage.push({ text: winnerMsg, author: 'Game' });
+			//delay
+			potToPlayer(winner)
 		}
 		return true
 	} else {
@@ -200,6 +298,7 @@ const resetActive = () => {
 };
 
 const changeBoard = () => {
+	console.log("changeBoard being called");
 	if (gameState.action === 'preflop') {
 		gameState.action = 'flop';
 		resetActive();
@@ -212,7 +311,7 @@ const changeBoard = () => {
 		resetPlayerAction();
 		gameState.minBet = 10
 		gameState.gameDeck.dealCards(1).forEach((card) => gameState.board.push(card));
-	} else if (gameState.action === 'turn') {	
+	} else if (gameState.action === 'turn') {
 		gameState.action = 'river';
 		resetActive();
 		resetPlayerAction();
@@ -230,12 +329,32 @@ const changeBoard = () => {
 const resetGame = () => {
 	gameState.board = [];
 	gameState.messages = [];
+	gameState.winnerMessage = [];
 	gameState.minBet = 20
+	gameState.started = false;
 	gameState.players.forEach((player) => {
 		player.cards = [];
 		player.activeBet = 0;
 		player.active = false
+		player.view = false;
+		player.dealer = '';
 	});
+	/*
+	var d;
+	for(let i = 0; i < gameState.players.length; i++) {
+		if(gameState.players[i].dealer === 'D') {
+			d = i;
+		}
+	}
+	if(d+1 < gameState.players.length) {
+		gameState.players[d].dealer = '';
+		gameState.players[d+1].dealer = 'D';
+	}
+	else {
+		gameState.players[d].dealer = '';
+		gameState.players[0].dealer = 'D';
+	}
+	*/
 }
 
 const removePlayer = (socketId) => {
@@ -260,9 +379,8 @@ const fold = (socketId) => {
 };
 
 const allInMode = () => {
-	
+	console.log("all In");
 	if (gameState.allIn === true) {
-
 		// deal out remaining cards
 		if (gameState.action === 'preflop') {
 			gameState.gameDeck.dealCards(5).forEach((card) => gameState.board.push(card));

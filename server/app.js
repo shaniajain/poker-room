@@ -18,6 +18,7 @@ const {
 	call,
 	bet,
 	raise,
+	view,
 	addMessage,
 	addName,
 	addSpectators,
@@ -28,6 +29,7 @@ const {
 	allInMode,
 	resetGame,
 	rebuyPlayer,
+	winnerMessage,
 	spectatePlayer
 } = require('./gameUtil');
 
@@ -82,14 +84,29 @@ io.on('connection', (socket) => {
 
 	socket.on('join', () => {
 		addPlayer(socket.id);
-		if (gameState.players.length > 1) {
+
+		if (gameState.players.length > 7) {
+			gameState.started = true;
 			setInitialBlinds();
 			dealPlayers();
 			io.sockets.emit('sound', 'dealCards');
 		}
+
 		io.sockets.emit('gameState', gameState);
 	});
 	io.sockets.emit('gameState', gameState);
+
+	socket.on('start', () => {
+			gameState.players[0].dealer = 'D';
+			setInitialBlinds();
+			dealPlayers();
+			gameState.started = true;
+			io.sockets.emit('sound', 'dealCards');
+		io.sockets.emit('gameState', gameState);
+	});
+	io.sockets.emit('gameState', gameState);
+
+
 
 	socket.on('action', (action) => {
 		if (action.type === 'check') {
@@ -120,6 +137,7 @@ io.on('connection', (socket) => {
 		io.sockets.emit('gameState', gameState);
 
 		// check if all players have completed an action
+
 		if (playerActionCheck()) {
 			allInMode()
 			changeBoard();
@@ -128,22 +146,29 @@ io.on('connection', (socket) => {
 			io.sockets.emit('gameState', gameState);
 			if (gameState.showdown === true) {
 				// note, if player leaves during setTimeout window, state is stuck waiting until next player joins
+				determineWinner();
+				io.sockets.emit('gameState', gameState);
 				setTimeout(() => {
-
 					if (determineWinner()) {
+						for(let i = 0; i < gameState.players.length; i++) {
+							gameState.players[i].view = false;
+						}
 						resetPlayerAction();
 						moveBlinds();
 						dealPlayers();
 							io.sockets.emit('rebuy', determineLose())
 						gameState.minBet = 20
 						gameState.showdown = false;
-						gameState.allIn = false
+						gameState.winnerMessage = [];
+						//gameState.started = true;
+						gameState.allIn = false;
 						io.sockets.emit('gameState', gameState)
 						io.sockets.emit('sound', 'dealCards');
 					} else {
 						resetGame()
 					}
-				}, 4000);
+				}, 10000);
+				//io.sockets.emit('gameState', gameState);
 			}
 		}
 	});

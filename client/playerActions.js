@@ -10,10 +10,17 @@ const Actions = (props) => {
 	const showdown = props.showdown;
 	const clientPlayer = props.clientPlayer;
 	const activeBet = props.activeBet;
+	const view = props.view;
 	return (
 		<div>
 			{clientPlayer.map((player) => {
-				if (player.active === false) {
+				if(player.view === true)
+				{
+					player.active = false;
+					console.log("Player " + player.name + " view is " + player.view);
+					return <div className="buttons-container-hidden" key={player.id} />;
+				}
+				else if (player.active === false || player.view === true) {
 					return <div className="buttons-container-hidden" key={player.id} />;
 				} else if (player.active && activeBet <= player.activeBet && showdown === false) {
 					return (
