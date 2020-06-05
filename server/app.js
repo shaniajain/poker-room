@@ -86,6 +86,7 @@ io.on('connection', (socket) => {
 		addPlayer(socket.id);
 
 		if (gameState.players.length > 7) {
+			gameState.players[0].dealer = 'D';
 			gameState.started = true;
 			setInitialBlinds();
 			dealPlayers();
@@ -152,6 +153,7 @@ io.on('connection', (socket) => {
 					if (determineWinner()) {
 						for(let i = 0; i < gameState.players.length; i++) {
 							gameState.players[i].view = false;
+							gameState.players[i].button = false;
 						}
 						resetPlayerAction();
 						moveBlinds();

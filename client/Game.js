@@ -81,7 +81,7 @@ class Test extends Component {
 				this.setState({ rebuyWindow: true });
 			}
 		});
-		
+
 	}
 
 	fold() {
@@ -178,6 +178,7 @@ class Test extends Component {
 							players={this.state.gameState.players}
 							id={this.state.id}
 							view={this.state.view}
+							clientPlayer={clientPlayer}
 						/>
 					</div>
 					<Actions

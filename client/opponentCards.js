@@ -16,8 +16,8 @@ const OpponentCards = (props) => {
 					if (player.cards.length > 0 && showdown === false) {
 						return (
 							<div className={'boardInner-' + count}>
-								<img className="playerCards" src={`/cardImages/blank.png`} style={{top:0, left:0, position: 'absolute'}}/>
-								<img className="playerCards" src={`/cardImages/blank.png`} style={{top:0, left:50,position: 'absolute'}}/>
+								<img className="playerCards" src={`/cardImages/blank.png`} />
+								<img className="playerCards" src={`/cardImages/blank.png`} />
 							</div>
 						);
 					}
@@ -25,8 +25,8 @@ const OpponentCards = (props) => {
 					else if (player.cards.length > 0 && showdown === true) {
 						return (
 							<div className={'boardInner-' + count}>
-								<img className="playerCards" src={`/cardImages/${player.cards[0]}.png`} style={{top:0, left:0, position: 'absolute'}}/>
-								<img className="playerCards" src={`/cardImages/${player.cards[1]}.png`} style={{top:0, left:50,position: 'absolute'}}/>
+								<img className="playerCards" src={`/cardImages/${player.cards[0]}.png`} />
+								<img className="playerCards" src={`/cardImages/${player.cards[1]}.png`} />
 							</div>
 						);
 					}
@@ -47,15 +47,15 @@ const OpponentCards = (props) => {
 						if (player.cards.length > 0 && showdown === false) {
 							return (
 								<div className={'boardInner-' + count}>
-									<img className="playerCards" src={`/cardImages/blank.png`} style={{top:0, left:0, position: 'absolute'}}/>
-									<img className="playerCards" src={`/cardImages/blank.png`} style={{top:0, left:50,position: 'absolute'}}/>
+									<img className="playerCards" src={`/cardImages/blank.png`} />
+									<img className="playerCards" src={`/cardImages/blank.png`} />
 								</div>
 							);
 						} else if (player.cards.length > 0 && showdown === true) {
 							return (
 								<div className={'boardInner'}>
-									<img className="playerCards" src={`/cardImages/${player.cards[0]}.png`} style={{top:0, left:0, position: 'absolute'}}/>
-									<img className="playerCards" src={`/cardImages/${player.cards[1]}.png`} style={{top:0, left:50,position: 'absolute'}}/>
+									<img className="playerCards" src={`/cardImages/${player.cards[0]}.png`} />
+									<img className="playerCards" src={`/cardImages/${player.cards[1]}.png`} />
 								</div>
 							);
 						} else {

@@ -64,10 +64,12 @@ const blindsToPot = () => {
 	gameState.pot = 0;
 	gameState.players.forEach((player) => {
 		if (player.smallBlind) {
+			console.log("smallBlind is" + player.name);
 			player.bankroll -= gameState.smallBlindValue;
 			player.activeBet = gameState.smallBlindValue;
 			gameState.pot += gameState.smallBlindValue;
 		} else if (player.bigBlind) {
+				console.log("bigBlind is" + player.name);
 			player.bankroll -= gameState.bigBlindValue;
 			player.activeBet = gameState.bigBlindValue;
 			gameState.pot += gameState.bigBlindValue;
@@ -79,6 +81,10 @@ const blindsToPot = () => {
 };
 
 const setInitialBlinds = () => {
+
+	for(let i = 0; i < gameState.players.length; i++) {
+		console.log("player " + i + ": " + gameState.players[i].name);
+	}
 	var d = 0;
 	var num_players = 0;
 	for (let i = 0; i < gameState.players.length; i++) {
@@ -102,30 +108,73 @@ const setInitialBlinds = () => {
 		gameState.players[d].bigBlind = true;	//make dealer big blind
 	}
 	//set blinds for more than two player game
+
 	else {
+		//set small blind:
+		if (d+1 < gameState.players.length && gameState.players[d+1].view === false) {
+			gameState.players[d+1].smallBlind = true;
+		}
+		else if (d+1 < gameState.players.length && gameState.players[d+1].view === true) {
+			gameState.players[0].smallBlind = true;
+		}
+		else if (d+1 >= gameState.players.length) {
+			gameState.players[0].smallBlind = true;
+		}
+		
+		//set big blind
+		if (d+2 < gameState.players.length && gameState.players[d+1].view === false) {
+			gameState.players[d+2].bigBlind = true;
+		}
+		else if (d+2 < gameState.players.length && gameState.players[d+2].view === true && gameState.players[d+1].view === false) {
+			gameState.players[0].bigBlind = true;
+		}
+		else if (d+2 < gameState.players.length && gameState.players[d+2].view === true && gameState.players[d+1].view === true) {
+			gameState.players[1].bigBlind = true;
+		}
+		else if (d+2 >= gameState.players.length && d+1 >= gameState.players.length) {
+			gameState.players[1].bigBlind = true;
+		}
+		else if (d+2 >= gameState.players.length && d+1 < gameState.players.length) {
+			gameState.players[0].bigBlind = true;
+		}
+
+		//if(d+1 < gameState.players.length && d+2 < gameState.players.length && gameState.players[d+1].view === false && gameState.players[d+2].view === false)
+		//else if (d+1 < gameState.players.length && d+2 >= gameState.players.length &&)
+		/*
 		if((d-1) >= 0 && (d-2) >= 0) {
 			gameState.players[d-1].smallBlind = true;
 			gameState.players[d-2].bigBlind = true;
+			console.log("setting " + gameState.players[d-1].name + " to smallBlind");
+			console.log("setting " + gameState.players[d-2].name + " to bigBlind");
 		}
 		else if((d-1) >= 0 && (d-2) < 0) {
 			gameState.players[d-1].smallBlind = true;
 			gameState.players[gameState.players.length-1].bigBlind = true;
+			console.log("setting " + gameState.players[d-1].name + " to smallBlind");
+			console.log("setting " + gameState.players[gameState.players.length-1].name + " to bigBlind");
 		}
 		else {
 			gameState.players[gameState.players.length-1].smallBlind = true;
 			gameState.players[gameState.players.length-2].bigBlind = true;
+			console.log("setting " + gameState.players[gameState.players.length-1].name + " to smallBlind");
+			console.log("setting " + gameState.players[gameState.players.length-2].name + " to bigBlind");
 		}
+		*/
 	}
-	gameState.players[0].active = true;
+	gameState.players[d].active = true;
 	blindsToPot();
 };
 
 const moveBlinds = () => {
 	//set dealer for next round
 	var d;
+	var num_players = 0;
 	for(let i = 0; i < gameState.players.length; i++) {
 		if(gameState.players[i].dealer === 'D') {
 			d = i;
+		}
+		if(gameState.players[i].view === false) {
+			num_players++;
 		}
 	}
 	if(d+1 < gameState.players.length) {
@@ -136,6 +185,7 @@ const moveBlinds = () => {
 		gameState.players[d].dealer = '';
 		gameState.players[0].dealer = 'D';
 	}
+	gameState.players[d].button = true;
 
 	for (let i = 0; i < gameState.players.length; i++) {
 		if (gameState.players[i].button === true) {
@@ -145,7 +195,7 @@ const moveBlinds = () => {
 			});
 
 			// set current button to false and switch to BB
-			if(gameState.players.length === 2) {
+			if(num_players === 2) {
 				gameState.players[i].button = false;
 				gameState.players[i].smallBlind = false;
 				gameState.players[i].bigBlind = true;
@@ -210,6 +260,14 @@ const check = (socketId) => {
 				gameState.players[0].active = true;
 			//	gameState.players[i].active = false;
 			}
+		}
+	}
+	for (let i = 0; i < gameState.players.length; i++) {
+		if(gameState.players[i].smallBlind === true) {
+				console.log("smallBlind is " + gameState.players[i].name);
+		}
+		if(gameState.players[i].bigBlind === true) {
+				console.log("bigBlind is " + gameState.players[i].name);
 		}
 	}
 };
@@ -338,23 +396,10 @@ const resetGame = () => {
 		player.active = false
 		player.view = false;
 		player.dealer = '';
+		player.smallBlind = false;
+		player.bigBlind = false;
+		player.button = false;
 	});
-	/*
-	var d;
-	for(let i = 0; i < gameState.players.length; i++) {
-		if(gameState.players[i].dealer === 'D') {
-			d = i;
-		}
-	}
-	if(d+1 < gameState.players.length) {
-		gameState.players[d].dealer = '';
-		gameState.players[d+1].dealer = 'D';
-	}
-	else {
-		gameState.players[d].dealer = '';
-		gameState.players[0].dealer = 'D';
-	}
-	*/
 }
 
 const removePlayer = (socketId) => {
