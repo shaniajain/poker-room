@@ -5,48 +5,83 @@ const OpponentCards = (props) => {
 	const players = props.players;
 	const id = props.id;
 	const messages = props.messages;
-	var count = 1;
+	var left = 1;
+	var diff = 0;
+
+	var client_index = 0;
+	players.map((player) => {
+		if(player.id === id) {
+			client_index = players.indexOf(player);
+		}
+	})
 
 	const otherPlayer = players.filter((player) => player.id !== id);
 	// player view
 	if (!props.spectator || !props.view) {
 		return (
 				otherPlayer.map((player) => {
-					count = count + 1;
-					if (player.cards.length > 0 && showdown === false) {
-						return (
-							<div className={'boardInner-' + count}>
-								<img className="playerCards" src={`/cardImages/blank.png`} />
-								<img className="playerCards" src={`/cardImages/blank.png`} />
-							</div>
-						);
-					}
+					//display cards for players seated to the left of client player
+					if(players.indexOf(player) > client_index) {
+						left = left + 1;
+						if (player.cards.length > 0 && showdown === false) {
+							return (
+								<div className={'boardInner-' + left}>
+									<img className="playerCards" src={`/cardImages/blank.png`} />
+									<img className="playerCards" src={`/cardImages/blank.png`} />
+								</div>
+							);
+						}
 
-					else if (player.cards.length > 0 && showdown === true) {
-						return (
-							<div className={'boardInner-' + count}>
-								<img className="playerCards" src={`/cardImages/${player.cards[0]}.png`} />
-								<img className="playerCards" src={`/cardImages/${player.cards[1]}.png`} />
-							</div>
-						);
-					}
+						else if (player.cards.length > 0 && showdown === true) {
+							return (
+								<div className={'boardInner-' + left}>
+									<img className="playerCards" src={`/cardImages/${player.cards[0]}.png`} />
+									<img className="playerCards" src={`/cardImages/${player.cards[1]}.png`} />
+								</div>
+							);
+						}
 
-					else {
-						return <div />;
+						else {
+							return <div />;
+						}
+						//display cards for players seated to the right of client player
+					} else if (players.indexOf(player) < client_index) {
+							diff = client_index - players.indexOf(player);
+							if (player.cards.length > 0 && showdown === false) {
+								return (
+									<div className={'boardInner-' + (9 - diff)}>
+										<img className="playerCards" src={`/cardImages/blank.png`} />
+										<img className="playerCards" src={`/cardImages/blank.png`} />
+									</div>
+								);
+							}
+
+							else if (player.cards.length > 0 && showdown === true) {
+								return (
+									<div className={'boardInner-' + (9 - diff)}>
+										<img className="playerCards" src={`/cardImages/${player.cards[0]}.png`} />
+										<img className="playerCards" src={`/cardImages/${player.cards[1]}.png`} />
+									</div>
+								);
+							}
+
+							else {
+								return <div />;
+							}
 					}
 				})
 
 		); // spectator view
 	} else {
-		count = 0;
+		left = 0;
 		return (
 		//	<div>
 			<div>
 					{otherPlayer.map((player) => {
-						count = count + 1;
+						left = left + 1;
 						if (player.cards.length > 0 && showdown === false) {
 							return (
-								<div className={'boardInner-' + count}>
+								<div className={'boardInner-' + left}>
 									<img className="playerCards" src={`/cardImages/blank.png`} />
 									<img className="playerCards" src={`/cardImages/blank.png`} />
 								</div>

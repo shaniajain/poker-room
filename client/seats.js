@@ -3,11 +3,23 @@ import React from 'react';
 const Seats = (props) => {
 	const players = props.players;
 	const clientPlayer = props.clientPlayer;
-	var count = 1;
+	var left = 1;
+	var diff = 0;
 	var i = 0;
 	var active = [];
 
+
+	console.log("client index: " + client_index);
+
 	if (clientPlayer[0]) {
+
+		var client_index = 0;
+		players.map((player) => {
+			if(player.id === clientPlayer[0].id) {
+				client_index = players.indexOf(player);
+			}
+		})
+
 		if(clientPlayer[0].active === true) {
 			active = '-active'
 		}
@@ -15,6 +27,7 @@ const Seats = (props) => {
 			active = ''
 		}
 
+		//seat client player
 		return (
 			<div>
 				<div key={clientPlayer[0].id} className={'seat-1' + active}>
@@ -25,38 +38,78 @@ const Seats = (props) => {
 				</div>
 
 				{players.map((player) => {
-				//	if (player.id !== props.id) {
+						//seat opponent players
 						if(player.id != clientPlayer[0].id){
-							count = count + 1;
-							if(player.view === true) {
-								return (
-									<div key={player.name} className={'seat-' + count}>
-										<div className="player">
-											<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-											<div className="player-font">${player.bankroll}</div>
+							//seat players on left
+							if(players.indexOf(player) > client_index) {
+								left = left + 1;
+
+								if(player.view === true) {
+									return (
+										<div key={player.name} className={'seat-' + left}>
+											<div className="player">
+												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
+												<div className="player-font">${player.bankroll}</div>
+											</div>
 										</div>
-									</div>
-								);
-							}
-							else if(player.active === true) {
-								return (
-									<div key={player.name} className={'seat-' + count + '-active'}>
-										<div className="player">
-											<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-											<div className="player-font">${player.bankroll}</div>
+									);
+								}
+								else if(player.active === true) {
+									return (
+										<div key={player.name} className={'seat-' + left + '-active'}>
+											<div className="player">
+												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
+												<div className="player-font">${player.bankroll}</div>
+											</div>
 										</div>
-									</div>
-								);
-							}
-							else {
-								return (
-									<div key={player.name} className={'seat-' + count}>
-										<div className="player">
-											<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-											<div className="player-font">${player.bankroll}</div>
+									);
+								}
+								else {
+									return (
+										<div key={player.name} className={'seat-' + left}>
+											<div className="player">
+												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
+												<div className="player-font">${player.bankroll}</div>
+											</div>
 										</div>
-									</div>
-								);
+									);
+								}
+
+							//seat players on right
+							} else if(players.indexOf(player) < client_index) {
+								diff = client_index - players.indexOf(player);
+
+								if(player.view === true) {
+									return (
+										<div key={player.name} className={'seat-' + (9 - diff)}>
+											<div className="player">
+												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
+												<div className="player-font">${player.bankroll}</div>
+											</div>
+										</div>
+									);
+								}
+								else if(player.active === true) {
+									return (
+										<div key={player.name} className={'seat-' + (9 - diff) + '-active'}>
+											<div className="player">
+												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
+												<div className="player-font">${player.bankroll}</div>
+											</div>
+										</div>
+									);
+								}
+								else {
+									return (
+										<div key={player.name} className={'seat-' + (9 - diff)}>
+											<div className="player">
+												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
+												<div className="player-font">${player.bankroll}</div>
+											</div>
+										</div>
+									);
+								}
+
 							}
 					}
 				})}
