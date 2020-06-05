@@ -111,7 +111,7 @@ div {
   display: flex;
   position: absolute;
   top: 70%;
-  left: 70%;
+  left: 74%;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   color: white;
@@ -126,7 +126,7 @@ div {
   display: flex;
   position: absolute;
   top: 50%;
-  left: 70%;
+  left: 74%;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   color: white;
@@ -141,7 +141,7 @@ div {
   display: flex;
   position: absolute;
   top: 35%;
-  left: 70%;
+  left: 74%;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   color: white;
@@ -156,7 +156,7 @@ div {
   display: flex;
   position: absolute;
   top: 70%;
-  left: 30%;
+  left: 31%;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   color: white;
@@ -171,7 +171,7 @@ div {
   display: flex;
   position: absolute;
   top: 50%;
-  left: 30%;
+  left: 31%;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   color: white;
@@ -186,7 +186,7 @@ div {
   display: flex;
   position: absolute;
   top: 35%;
-  left: 30%;
+  left: 31%;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   color: white;
@@ -201,7 +201,7 @@ div {
   display: flex;
   position: absolute;
   top: 30%;
-  left: 50%;
+  left: 53%;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   color: white;
@@ -216,7 +216,7 @@ div {
   display: flex;
   position: absolute;
   top: 75%;
-  left: 50%;
+  left: 53%;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   color: white;
@@ -266,7 +266,7 @@ div {
   display: flex;
   position: absolute;
   top: 20%;
-  left: 57%;
+  left: 50%;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
   background-color: #26787c;
