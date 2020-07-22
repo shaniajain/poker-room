@@ -392,15 +392,29 @@ const resetGame = () => {
 }
 
 const removePlayer = (socketId) => {
+	const player = gameState.players.filter((player) => player.id === socketId)[0];
+	player.cards = [];
+	player.activeBet = 0;
+	player.view = true;
+	check(socketId);
+	
+
 	const oldPlayers = gameState.players.length
 	gameState.players = gameState.players.filter((player) => player.id !== socketId);
 	if (gameState.players.length !== oldPlayers) {
-		resetGame()
+		if(gameState.players.length > 1) {
+			gameState.players[0].action = true;
+		}
+		else {
+			resetGame();
+		}
+	//	resetGame()
 		// give pot to remaining player
 		gameState.players.forEach((player) => potToPlayer(player));
 	}
 	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
 };
+
 
 const fold = (socketId) => {
 		const player = gameState.players.filter((player) => player.id === socketId)[0];
@@ -422,12 +436,21 @@ const fold = (socketId) => {
 					const winner = gameState.players[i];
 					for(let j = 0; j < gameState.players.length; j++) {
 						gameState.players[j].view = false;
+						gameState.players[j].action = false;
 					}
-			  	potToPlayer(winner);
-			  	dealPlayers();
-			  	resetPlayerAction();
-			  	moveBlinds();
-				  gameState.minBet = 20;
+
+					const winnerMsg = winner.name + ' won $' + gameState.pot;
+					//gameState.winnerMessage.push({ text: winnerMsg, author: 'Game' });
+					potToPlayer(winner);
+					//setTimeout(() => {
+							dealPlayers();
+							resetPlayerAction();
+							moveBlinds();
+							gameState.minBet = 20
+							gameState.winnerMessage = [];
+					//		console.log("winner message: " + gameState.winnerMessage);
+				//	}, 10000);
+
 					break;
 				}
 			}
